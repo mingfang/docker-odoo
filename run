@@ -1,0 +1,1 @@
+docker run -v /etc/localtime:/etc/localtime:ro -v /var/log:/var/log -d -t bash

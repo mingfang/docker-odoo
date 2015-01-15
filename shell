@@ -1,0 +1,1 @@
+docker run -p 8069:8069 -v `pwd`:/docker -w /docker --rm -it odoo /bin/bash
