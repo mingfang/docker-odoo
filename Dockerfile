@@ -14,19 +14,14 @@ RUN echo 'export > /etc/envvars' >> /root/.bashrc
 #Utilities
 RUN apt-get install -y vim less net-tools inetutils-ping wget curl git telnet nmap socat dnsutils netcat tree htop unzip sudo software-properties-common jq psmisc
 
-RUN apt-get install -y runit 
-CMD /usr/sbin/runsvdir-start
+#Requirements
+RUN apt-get install -y postgresql gdebi-core
 
-#Utilities
-RUN apt-get install -y vim less net-tools inetutils-ping wget curl git telnet nmap socat dnsutils netcat tree htop unzip sudo software-properties-common
-
-RUN apt-get install -y postgresql
-
-RUN apt-get install -y gdebi-core
-
+#Odoo
 RUN wget http://nightly.odoo.com/8.0/nightly/deb/odoo_8.0.latest_all.deb 
 RUN gdebi -n odoo*.deb
 
+#Configure database
 ADD odoo.ddl /
 RUN sudo -u postgres /usr/lib/postgresql/9.3/bin/postmaster -D /etc/postgresql/9.3/main & sleep 3 && \
     sudo -u postgres psql < odoo.ddl
@@ -36,4 +31,3 @@ RUN chmod 777 /usr/lib/python2.7/dist-packages/openerp/addons
 
 #Add runit services
 ADD sv /etc/service 
-
