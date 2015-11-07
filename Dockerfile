@@ -17,9 +17,23 @@ RUN apt-get install -y vim less net-tools inetutils-ping wget curl git telnet nm
 #Requirements
 RUN apt-get install -y postgresql gdebi-core
 
+#python-ofxparse
+RUN wget http://http.us.debian.org/debian/pool/main/p/python-ofxparse/python-ofxparse_0.14-1_all.deb && \
+    gdebi -n *.deb && \
+    rm *.deb
+
+#wkhtmltox
+RUN wget http://download.gna.org/wkhtmltopdf/0.12/0.12.2.1/wkhtmltox-0.12.2.1_linux-trusty-amd64.deb && \
+    gdebi -n *.deb && \
+    rm *.deb
+RUN cp /usr/local/bin/wkhtmltopdf /usr/bin && \
+    cp /usr/local/bin/wkhtmltoimage /usr/bin 
+
 #Odoo
-RUN wget http://nightly.odoo.com/8.0/nightly/deb/odoo_8.0.latest_all.deb 
-RUN gdebi -n odoo*.deb
+RUN wget -O - https://nightly.odoo.com/odoo.key | apt-key add -
+RUN echo "deb http://nightly.odoo.com/9.0/nightly/deb/ ./" >> /etc/apt/sources.list
+RUN apt-get update && \
+    apt-get install -y odoo
 
 #Configure database
 ADD odoo.ddl /
