@@ -1,4 +1,4 @@
-CREATE ROLE openerp WITH SUPERUSER LOGIN PASSWORD 'postgres';
+CREATE ROLE odoo WITH SUPERUSER LOGIN PASSWORD 'postgres';
 
 update pg_database set datallowconn = TRUE where datname = 'template0';
 update pg_database set datistemplate = FALSE where datname = 'template1';

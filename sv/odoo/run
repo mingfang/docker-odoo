@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash -x
 
-sv start postgres || exit 1
+source /etc/envvars
 
 exec 2>&1
-chpst -u openerp openerp-server
+chpst -u odoo odoo --proxy-mode --db_host=${DB_HOST} --db_user=${DB_USER=odoo} --db_password=${DB_PASSWORD} --data-dir=${DATA_DIR=/tmp}

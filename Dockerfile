@@ -1,47 +1,32 @@
-FROM ubuntu:14.04
- 
-ENV DEBIAN_FRONTEND noninteractive
-RUN apt-get update
-RUN locale-gen en_US en_US.UTF-8
-ENV LANG en_US.UTF-8
-RUN echo "export PS1='\e[1;31m\]\u@\h:\w\\$\[\e[0m\] '" >> /root/.bashrc
+FROM ubuntu:16.04
 
-#Runit
-RUN apt-get install -y runit 
+ENV DEBIAN_FRONTEND=noninteractive \
+    LANG=en_US.UTF-8 \
+    TERM=xterm
+RUN locale-gen en_US en_US.UTF-8
+RUN echo "export PS1='\e[1;31m\]\u@\h:\w\\$\[\e[0m\] '" | tee -a /root/.bashrc /etc/bash.bashrc
+RUN apt-get update
+
+# Runit
+RUN apt-get install -y --no-install-recommends runit
 CMD export > /etc/envvars && /usr/sbin/runsvdir-start
 RUN echo 'export > /etc/envvars' >> /root/.bashrc
+RUN echo "alias tcurrent='tail /var/log/*/current -f'" | tee -a /root/.bashrc /etc/bash.bashrc
 
-#Utilities
-RUN apt-get install -y vim less net-tools inetutils-ping wget curl git telnet nmap socat dnsutils netcat tree htop unzip sudo software-properties-common jq psmisc
-
-#Requirements
-RUN apt-get install -y postgresql gdebi-core
-
-#python-ofxparse
-RUN wget http://http.us.debian.org/debian/pool/main/p/python-ofxparse/python-ofxparse_0.14-1_all.deb && \
-    gdebi -n *.deb && \
-    rm *.deb
-
-#wkhtmltox
-RUN wget http://download.gna.org/wkhtmltopdf/0.12/0.12.2.1/wkhtmltox-0.12.2.1_linux-trusty-amd64.deb && \
-    gdebi -n *.deb && \
-    rm *.deb
-RUN cp /usr/local/bin/wkhtmltopdf /usr/bin && \
-    cp /usr/local/bin/wkhtmltoimage /usr/bin 
+# Utilities
+RUN apt-get install -y --no-install-recommends vim less net-tools inetutils-ping wget curl git telnet nmap socat dnsutils netcat tree htop unzip sudo software-properties-common jq psmisc iproute python ssh
 
 #Odoo
 RUN wget -O - https://nightly.odoo.com/odoo.key | apt-key add -
-RUN echo "deb http://nightly.odoo.com/9.0/nightly/deb/ ./" >> /etc/apt/sources.list
+RUN echo "deb http://nightly.odoo.com/10.0/nightly/deb/ ./" >> /etc/apt/sources.list
 RUN apt-get update && \
     apt-get install -y odoo
 
-#Configure database
-ADD odoo.ddl /
-RUN sudo -u postgres /usr/lib/postgresql/9.3/bin/postmaster -D /etc/postgresql/9.3/main & sleep 3 && \
-    sudo -u postgres psql < odoo.ddl
+#wkhtmltox
+RUN wget -O - http://download.gna.org/wkhtmltopdf/0.12/0.12.4/wkhtmltox-0.12.4_linux-generic-amd64.tar.xz | tar xJ
+ENV PATH $PATH:/wkhtmltox/bin
 
-RUN useradd -m openerp
-RUN chmod 777 /usr/lib/python2.7/dist-packages/openerp/addons
-
-#Add runit services
-ADD sv /etc/service 
+# Add runit services
+COPY sv /etc/service 
+ARG BUILD_INFO
+LABEL BUILD_INFO=$BUILD_INFO
