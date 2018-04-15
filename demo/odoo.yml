@@ -1,0 +1,49 @@
+namespaces:
+  {{namespace}}:
+    services:
+    - name: odoo
+      ports:
+      - {name: http-odoo, port: 8069}
+      - {name: postgres, port: 5432}
+      annotations:
+        nginx:
+        - http:
+          - server: odoo.{{namespace}}.*
+            paths:
+            - path: /
+      pod:
+        replicas: 1
+        containers:
+        - name: odoo
+          image: registry.rebelsoft.com/odoo:latest
+          env:
+          - {name: DB_HOST, value: "odoo-postgres"}
+          - {name: DB_USER, value: "odoo"}
+          - {name: DB_PASSWORD, value: "odoo"}
+        - name: postgres
+          image: registry.rebelsoft.com/postgres:latest
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                - sh
+                - -c
+                - >
+                  sleep 10;
+                  psql -U postgres --command="select 1";
+                  psql -U postgres -tc "SELECT 1 FROM pg_database WHERE datname = 'odoo'" | grep -q 1;
+                  if [ $? -eq 1 ]; then
+                    psql -U postgres -c "CREATE DATABASE odoo";
+                  fi;
+                  psql -U postgres -tc "SELECT 1 FROM pg_user WHERE usename = 'odoo'" | grep -q 1;
+                  if [ $? -eq 1 ]; then
+                    psql -U postgres -c "CREATE USER odoo WITH PASSWORD 'odoo'";
+                  fi;
+                  psql -U postgres -c "GRANT ALL PRIVILEGES ON DATABASE odoo TO odoo";
+            preStop:
+              exec:
+                command:
+                - sh
+                - -c
+                - >
+                  sudo -u postgres /usr/lib/postgresql/*/bin/pg_ctl -m smart -D /data stop;
