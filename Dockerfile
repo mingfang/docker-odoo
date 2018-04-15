@@ -19,12 +19,12 @@ RUN apt-get install -y --no-install-recommends vim less net-tools inetutils-ping
 
 #Odoo
 RUN wget -O - https://nightly.odoo.com/odoo.key | apt-key add -
-RUN echo "deb http://nightly.odoo.com/10.0/nightly/deb/ ./" >> /etc/apt/sources.list
+RUN echo "deb http://nightly.odoo.com/11.0/nightly/deb/ ./" >> /etc/apt/sources.list
 RUN apt-get update && \
     apt-get install -y odoo
 
 #wkhtmltox
-RUN wget -O - http://download.gna.org/wkhtmltopdf/0.12/0.12.4/wkhtmltox-0.12.4_linux-generic-amd64.tar.xz | tar xJ
+RUN wget -O - https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.4/wkhtmltox-0.12.4_linux-generic-amd64.tar.xz | tar xJ
 ENV PATH $PATH:/wkhtmltox/bin
 
 # Add runit services
