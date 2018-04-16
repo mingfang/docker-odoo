@@ -3,4 +3,4 @@
 source /etc/envvars
 
 exec 2>&1
-chpst -u odoo odoo --proxy-mode --db_host=${DB_HOST} --db_user=${DB_USER=odoo} --db_password=${DB_PASSWORD} --data-dir=${DATA_DIR=/tmp}
+chpst -u odoo odoo --proxy-mode --database=${DB_NAME=odoo} --db_host=${DB_HOST} --db_user=${DB_USER=odoo} --db_password=${DB_PASSWORD} --data-dir=${DATA_DIR=/tmp}

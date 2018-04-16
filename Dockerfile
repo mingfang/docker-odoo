@@ -27,6 +27,9 @@ RUN apt-get update && \
 RUN wget -O - https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.4/wkhtmltox-0.12.4_linux-generic-amd64.tar.xz | tar xJ
 ENV PATH $PATH:/wkhtmltox/bin
 
+RUN apt-get install -y python-pip
+RUN pip install num2words phonenumbers
+
 # Add runit services
 COPY sv /etc/service 
 ARG BUILD_INFO
