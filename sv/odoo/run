@@ -3,4 +3,7 @@
 source /etc/envvars
 
 exec 2>&1
+
+until psql -h ${DB_HOST} -U ${DB_USER=odoo} --command="select 1;"; do echo "Wait for Postgres before starting Odoo..."; sleep 3; done
+
 chpst -u odoo odoo --proxy-mode --database=${DB_NAME=odoo} --db_host=${DB_HOST} --db_user=${DB_USER=odoo} --db_password=${DB_PASSWORD} --data-dir=${DATA_DIR=/tmp}
